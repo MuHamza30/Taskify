@@ -1,6 +1,4 @@
 const { Task } = require("../models/task.model")
-const { notifyTaskEvent } = require("../services/slackNotifier");
-
 const getAllTasks = async (req, res) => {
    try {
        const tasks = await Task.find();
@@ -17,8 +15,6 @@ const createTask = async (req, res) => {
         }
         const task = new Task({ title, description });
         await task.save();
-
-        await notifyTaskEvent({ action: 'created', task });
 
         res.status(201).json(task);
     } catch (error) {
@@ -44,7 +40,6 @@ const updateTask = async (req, res) => {
             task.completed = completed;
         }
         await task.save();
-        await notifyTaskEvent({ action: 'updated', task });
         res.json(task);
         
     } catch (error) {
@@ -58,7 +53,6 @@ const deleteTask = async (req, res) => {
         if (!tasks) {
            return res.status(404).json({ error: 'Task not find'}) 
         }
-        await notifyTaskEvent({ action: 'deleted', task: tasks });
         res.json({message:'Task deleted successfully'});
     } catch (error) {
         res.status(500).json({ error: 'Internal Server Error' });
@@ -78,8 +72,6 @@ const markTaskAsCompleted = async (req, res) => {
 
         tasks.completed = true;
         await tasks.save();
-
-        await notifyTaskEvent({ action: 'completed', task: tasks });
 
         res.json(tasks);
     } catch (error) {
