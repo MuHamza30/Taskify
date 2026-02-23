@@ -39,6 +39,14 @@ Welcome to Task Manager API, a simple API for managing tasks.
    ```env
    PORT=3000
    mongoUrl=your_mongodb_uri
+   
+   # Optional Slack notifications
+   SLACK_NOTIFICATIONS_ENABLED=false
+   SLACK_OAUTH_CLIENT_ID=your_client_id
+   SLACK_OAUTH_CLIENT_SECRET=your_client_secret
+   SLACK_OAUTH_REDIRECT_URI=your_redirect_uri
+   SLACK_BOT_TOKEN=xoxb-your-bot-token
+   SLACK_CHANNEL_ID=C0123456789
    ```
 
 4. Start the server:
@@ -103,6 +111,19 @@ curl -X DELETE http://localhost:3000/api/tasks/:id
 #### Mark a task as completed
 ```bash
 curl -X PUT http://localhost:3000/api/tasks/:id/complete
+```
+
+## Slack Notifications (Optional)
+When enabled, the API sends a Slack message on task create/update/complete/delete.
+
+Enable by setting:
+```env
+SLACK_NOTIFICATIONS_ENABLED=true
+SLACK_OAUTH_CLIENT_ID=your_client_id
+SLACK_OAUTH_CLIENT_SECRET=your_client_secret
+SLACK_OAUTH_REDIRECT_URI=your_redirect_uri
+SLACK_BOT_TOKEN=your_bot_token
+SLACK_CHANNEL_ID=your_channel_id
 ```
 
 ## Contributing
