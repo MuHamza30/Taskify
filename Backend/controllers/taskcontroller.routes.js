@@ -1,5 +1,5 @@
 const { Task } = require("../models/task.model");
-const { sendSlackNotification } = require("../services/slack.service");
+const { sendSlackNotification, notifyTaskCreated } = require("../services/slack.service");
 
 const getAllTasks = async (req, res) => {
    try {
@@ -19,7 +19,7 @@ const createTask = async (req, res) => {
         const task = new Task({ title, description });
         await task.save();
 
-        sendSlackNotification(`🆕 New task created: *${task.title}* (ID: ${task._id})`);
+        await notifyTaskCreated(task);
 
         res.status(201).json(task);
     } catch (error) {

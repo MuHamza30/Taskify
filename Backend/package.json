@@ -11,11 +11,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@slack/webhook": "^7.0.7",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
     "dotenv": "^16.4.1",
     "express": "^4.18.2",
-    "mongoose": "^8.1.1"
+    "mongoose": "^8.1.1",
+    "slack-apimatic-sdk-sdk": "^1.0.1"
   }
 }

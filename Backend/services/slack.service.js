@@ -1,27 +1,66 @@
-const { IncomingWebhook } = require('@slack/webhook');
+const { ChatApi, Client, Environment } = require('slack-apimatic-sdk-sdk');
 require('dotenv').config();
 
-const webhookUrl = process.env.SLACK_WEBHOOK_URL || '';
-let webhookClient = null;
+const slackBotToken = process.env.SLACK_BOT_TOKEN || '';
+const slackChannelId = process.env.SLACK_CHANNEL_ID || '';
 
-if (webhookUrl) {
-    webhookClient = new IncomingWebhook(webhookUrl);
-} else {
-    console.warn('SLACK_WEBHOOK_URL is not configured. Slack notifications are disabled.');
+let chatApi = null;
+
+if (!slackBotToken) {
+    console.warn('Slack notifications disabled: SLACK_BOT_TOKEN is missing.');
+}
+if (!slackChannelId) {
+    console.warn('Slack notifications disabled: SLACK_CHANNEL_ID is missing.');
+}
+
+if (slackBotToken && slackChannelId) {
+    const client = new Client({
+        environment: Environment.Production,
+        authorizationCodeAuthCredentials: {
+            oauthToken: {
+                accessToken: slackBotToken,
+                tokenType: 'Bearer',
+            },
+        },
+    });
+
+    chatApi = new ChatApi(client);
 }
 
 const sendSlackNotification = async (message) => {
-    if (!webhookClient) {
+    if (!chatApi || !slackBotToken || !slackChannelId) {
         return;
     }
 
     try {
-        await webhookClient.send({
-            text: message,
-        });
+        await chatApi.chatPostMessage(
+            slackBotToken,
+            slackChannelId,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            message,
+            undefined,
+            undefined,
+            undefined,
+            undefined
+        );
     } catch (error) {
-        console.error('Failed to send Slack notification:', error.message);
+        const slackError = error?.result || error?.message || 'Unknown Slack error';
+        console.error('Failed to send Slack notification:', slackError);
     }
 };
 
-module.exports = { sendSlackNotification };
+const notifyTaskCreated = async (task) => {
+    const descriptionLine = task.description ? `• Description: ${task.description}` : '';
+    const message = `🆕 *New Task Created*\n• Title: *${task.title}*\n${descriptionLine}\n• Task ID: ${task._id}`;
+    await sendSlackNotification(message.trim());
+};
+
+module.exports = { sendSlackNotification, notifyTaskCreated };
