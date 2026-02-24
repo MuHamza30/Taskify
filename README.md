@@ -40,9 +40,10 @@ Welcome to Task Manager API, a simple API for managing tasks.
    ```env
    PORT=3000
    mongoUrl=your_mongodb_uri
-   SLACK_WEBHOOK_URL=optional_slack_incoming_webhook
+   SLACK_BOT_TOKEN=xoxb-your-slack-bot-token
+   SLACK_CHANNEL_ID=C1234567890
    ```
-   Leave `SLACK_WEBHOOK_URL` empty if you do not want Slack notifications.
+   Leave `SLACK_BOT_TOKEN` and `SLACK_CHANNEL_ID` empty if you do not want Slack notifications.
 
 4. Start the server:
    ```bash
@@ -109,15 +110,16 @@ curl -X PUT http://localhost:3000/api/tasks/:id/complete
 ```
 
 ## Slack Integration
-The backend can now push Taskify activity updates directly to Slack using an [Incoming Webhook](https://api.slack.com/messaging/webhooks).
+The backend now calls Slack's [`chat.postMessage`](https://api.slack.com/methods/chat.postMessage) endpoint via the official Web API client. This lets Taskify post directly into any channel your bot has access to.
 
-- Set `SLACK_WEBHOOK_URL` in `.env` to your webhook URL.
-- When configured, Taskify automatically sends messages for:
-  - New task creation
+- Set `SLACK_BOT_TOKEN` in `.env` to your Slack bot token (starts with `xoxb-`).
+- Set `SLACK_CHANNEL_ID` to the target channel/conversation ID (e.g., `C01ABCD2EFG`).
+- When both variables are present, Taskify automatically sends messages for:
+  - New task creation (includes the task title/ID)
   - Task updates (title, description, completion state)
   - Task deletions
   - Tasks marked as complete
-- If the variable is missing, the API will run normally without attempting to contact Slack.
+- If either variable is missing, the API will log a warning and run normally without attempting to contact Slack.
 
 ## Contributing
 
