@@ -1,4 +1,5 @@
 const { Task } = require("../models/task.model")
+const { sendTaskCreatedNotification } = require("../services/slackNotificationService");
 const getAllTasks = async (req, res) => {
    try {
        const tasks = await Task.find();
@@ -16,7 +17,9 @@ const createTask = async (req, res) => {
         const task = new Task({ title, description });
         await task.save();
 
-        res.status(201).json(task);
+        const slackNotification = await sendTaskCreatedNotification(task);
+
+        res.status(201).json({ task, slackNotification });
     } catch (error) {
         res.status(500).json({ error: 'Internal Server Error' });
     }
