@@ -35,11 +35,17 @@ Welcome to Task Manager API, a simple API for managing tasks.
    npm install
    ```
 
-3. Set up your environment variables by creating a `.env` file in the project root and adding the following:
+3. Set up your environment variables by creating a `.env` file inside the `Backend` directory (you can copy `Backend/.env.example`), then add the following values:
    ```env
    PORT=3000
    mongoUrl=your_mongodb_uri
+   SLACK_BOT_TOKEN=xoxb-your-slack-bot-token
+   SLACK_CHANNEL_ID=your-channel-id
+   SLACK_CLIENT_ID=optional-slack-client-id
+   SLACK_CLIENT_SECRET=optional-slack-client-secret
+   SLACK_REDIRECT_URI=optional-slack-redirect
    ```
+   `SLACK_BOT_TOKEN` and `SLACK_CHANNEL_ID` are required for posting notifications. The client/secret/redirect values are only needed if your workspace rotates tokens via OAuth but are kept for parity with the SDK's OAuth configuration.
 
 4. Start the server:
    ```bash
@@ -62,6 +68,7 @@ Welcome to Task Manager API, a simple API for managing tasks.
       "description": "Task Description 1"
     }
     ```
+  - Also posts the task details to the configured Slack channel via `chat.postMessage` when Slack credentials are present.
 
 - **PUT /api/tasks/:id**
   - Update a task.
@@ -89,6 +96,11 @@ curl http://localhost:3000/api/tasks
 ```bash
 curl -X POST -H "Content-Type: application/json" -d '{"title": "New Task", "description": "Task Description"}' http://localhost:3000/api/tasks
 ```
+
+### Slack Notifications
+- Configure the Slack-related environment variables to enable notifications when a task is created.
+- The backend uses the `slack-apimatic-sdk-sdk@1.0.1` package (via the MCP instructions) to call `chat.postMessage`.
+- Missing credentials are logged and do not block task creation, but no Slack message will be sent.
 
 #### Update a task
 ```bash
