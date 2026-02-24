@@ -1,4 +1,6 @@
-const { Task } = require("../models/task.model")
+const { Task } = require("../models/task.model");
+const { sendSlackNotification } = require("../services/slack.service");
+
 const getAllTasks = async (req, res) => {
    try {
        const tasks = await Task.find();
@@ -7,6 +9,7 @@ const getAllTasks = async (req, res) => {
        res.status(500).json({ error: 'Internal Server Error' });
    }
 }
+
 const createTask = async (req, res) => {
     const { title, description } = req.body;
     try {
@@ -16,17 +19,20 @@ const createTask = async (req, res) => {
         const task = new Task({ title, description });
         await task.save();
 
+        sendSlackNotification(`🆕 New task created: *${task.title}* (ID: ${task._id})`);
+
         res.status(201).json(task);
     } catch (error) {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 }
+
 const updateTask = async (req, res) => {
     const taskId = req.params.id;
     const { title, description, completed } = req.body;
     try {
         const task = await Task.findById(taskId);
-        if (!task) { 
+        if (!task) {
             return res.status(404).json({error: 'Task not found'});
         }
 
@@ -40,24 +46,32 @@ const updateTask = async (req, res) => {
             task.completed = completed;
         }
         await task.save();
+
+        sendSlackNotification(`✏️ Task updated: *${task.title}* (ID: ${task._id})`);
+
         res.json(task);
-        
+
     } catch (error) {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 }
+
 const deleteTask = async (req, res) => {
     const taskId = req.params.id;
     try {
         const tasks = await Task.findByIdAndDelete(taskId);
         if (!tasks) {
-           return res.status(404).json({ error: 'Task not find'}) 
+           return res.status(404).json({ error: 'Task not find'})
         }
+
+        sendSlackNotification(`🗑️ Task deleted: *${tasks.title}* (ID: ${tasks._id})`);
+
         res.json({message:'Task deleted successfully'});
     } catch (error) {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 }
+
 const markTaskAsCompleted = async (req, res) => {
     const taskId = req.params.id;
     try {
@@ -73,6 +87,8 @@ const markTaskAsCompleted = async (req, res) => {
         tasks.completed = true;
         await tasks.save();
 
+        sendSlackNotification(`✅ Task completed: *${tasks.title}* (ID: ${tasks._id})`);
+
         res.json(tasks);
     } catch (error) {
         res.status(500).json({ error: 'Internal Server Error' });
@@ -85,5 +101,4 @@ module.exports = {
     updateTask,
     deleteTask,
     markTaskAsCompleted,
-    
 };

@@ -14,6 +14,7 @@ Welcome to Task Manager API, a simple API for managing tasks.
 - [Usage](#usage)
   - [Endpoints](#endpoints)
   - [Examples](#examples)
+- [Slack Integration](#slack-integration)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -39,7 +40,9 @@ Welcome to Task Manager API, a simple API for managing tasks.
    ```env
    PORT=3000
    mongoUrl=your_mongodb_uri
+   SLACK_WEBHOOK_URL=optional_slack_incoming_webhook
    ```
+   Leave `SLACK_WEBHOOK_URL` empty if you do not want Slack notifications.
 
 4. Start the server:
    ```bash
@@ -105,9 +108,18 @@ curl -X DELETE http://localhost:3000/api/tasks/:id
 curl -X PUT http://localhost:3000/api/tasks/:id/complete
 ```
 
+## Slack Integration
+The backend can now push Taskify activity updates directly to Slack using an [Incoming Webhook](https://api.slack.com/messaging/webhooks).
+
+- Set `SLACK_WEBHOOK_URL` in `.env` to your webhook URL.
+- When configured, Taskify automatically sends messages for:
+  - New task creation
+  - Task updates (title, description, completion state)
+  - Task deletions
+  - Tasks marked as complete
+- If the variable is missing, the API will run normally without attempting to contact Slack.
+
 ## Contributing
 
 Feel free to contribute to this project. Fork it, create a pull request, and your contributions will be considered.
-
-
 
