@@ -1,26 +1,30 @@
-const { IncomingWebhook } = require('@slack/webhook');
+const { WebClient } = require('@slack/web-api');
 require('dotenv').config();
 
-const webhookUrl = process.env.SLACK_WEBHOOK_URL || '';
-let webhookClient = null;
+const slackBotToken = process.env.SLACK_BOT_TOKEN || '';
+const slackChannelId = process.env.SLACK_CHANNEL_ID || '';
+let slackClient = null;
 
-if (webhookUrl) {
-    webhookClient = new IncomingWebhook(webhookUrl);
+if (slackBotToken && slackChannelId) {
+    slackClient = new WebClient(slackBotToken);
 } else {
-    console.warn('SLACK_WEBHOOK_URL is not configured. Slack notifications are disabled.');
+    console.warn('Slack notifications disabled: SLACK_BOT_TOKEN and/or SLACK_CHANNEL_ID are not configured.');
 }
 
 const sendSlackNotification = async (message) => {
-    if (!webhookClient) {
+    if (!slackClient) {
         return;
     }
 
     try {
-        await webhookClient.send({
+        await slackClient.chat.postMessage({
+            channel: slackChannelId,
             text: message,
+            mrkdwn: true,
         });
     } catch (error) {
-        console.error('Failed to send Slack notification:', error.message);
+        const slackError = error.data?.error || error.message;
+        console.error('Failed to send Slack notification:', slackError);
     }
 };
 
